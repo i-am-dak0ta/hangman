@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "2.2.10"
     kotlin("plugin.serialization") version "2.2.0"
     application
+    jacoco
 }
 
 repositories {
@@ -12,7 +13,7 @@ group = "hangman"
 version = "unspecified"
 
 application {
-    mainClass.set("academy.MainKt")
+    mainClass.set("app.MainKt")
     applicationDefaultJvmArgs = listOf(
         "-Dfile.encoding=UTF-8",
         "-Dsun.stdout.encoding=UTF-8",
@@ -22,7 +23,7 @@ application {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "academy.MainKt"
+        attributes["Main-Class"] = "app.MainKt"
     }
 }
 
@@ -45,12 +46,27 @@ dependencies {
     }
 }
 
+jacoco {
+    toolVersion = "0.8.13"
+}
+
 tasks.test {
     useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed")
     }
     jvmArgs("-javaagent:${mockitoAgent.asPath}")
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(false)
+        html.required.set(true)
+        csv.required.set(false)
+    }
 }
 
 kotlin {
